@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useApp } from '../store'
 import { knowledgePoints, demoConfigs } from '../data/knowledge'
 import { subjectLabel, subjectClass } from '../utils'
@@ -6,6 +7,11 @@ import { Formula } from '../components/Formula'
 export default function KnowledgeDetail() {
   const { currentKpId, navigate } = useApp()
   const kp = knowledgePoints.find((k) => k.id === currentKpId) ?? knowledgePoints[0]
+
+  // 知识关联跳转（前置/下一步）后回到顶部
+  useEffect(() => {
+    window.scrollTo({ top: 0 })
+  }, [kp.id])
   const demo = demoConfigs.find((d) => d.id === kp.demoId)
 
   return (
@@ -15,10 +21,10 @@ export default function KnowledgeDetail() {
       </button>
 
       <div className="page-head">
-        <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 10, alignItems: 'center' }}>
           <span className={`chip ${subjectClass(kp.subject)}`}>{subjectLabel(kp.subject)}</span>
           <span className="chip chip-ok">{kp.chapter}</span>
-          <span className="small muted">{kp.grade}</span>
+          <span className="small muted" style={{ lineHeight: 1 }}>{kp.grade}</span>
         </div>
         <h1 className="page-title">{kp.name}</h1>
       </div>

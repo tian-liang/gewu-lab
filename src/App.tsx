@@ -52,6 +52,11 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // 跨页跳转后回到顶部（做相关练习、打开演示、侧栏导航等）
+  useEffect(() => {
+    window.scrollTo({ top: 0 })
+  }, [route])
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
