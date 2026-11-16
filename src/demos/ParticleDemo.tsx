@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { fitText } from './canvas-text'
+import { setupCanvas, startLoop } from './canvas-env'
 
 interface Particle {
   x: number
@@ -23,15 +24,9 @@ export default function ParticleDemo() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const dpr = window.devicePixelRatio || 1
-    const W = canvas.clientWidth
-    const H = W < 560 ? 360 : 400
-    canvas.width = W * dpr
-    canvas.height = H * dpr
-    canvas.style.height = `${H}px`
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    const env = setupCanvas(canvas, (w) => (w < 560 ? 360 : 400))
+    if (!env) return
+    const { ctx, W, H } = env
 
     // 粒子按当前画布尺寸生成/重排（修复硬编码坐标导致的移动端越界）
     const cols = W < 560 ? 8 : 12
@@ -67,8 +62,6 @@ export default function ParticleDemo() {
     }
     arrange(particlesRef.current)
     sizeRef.current = { w: W, h: H }
-
-    let raf = 0
 
     const draw = () => {
       const T = tempRef.current
@@ -165,12 +158,9 @@ export default function ParticleDemo() {
           ctx.stroke()
         }
       }
-
-      raf = requestAnimationFrame(draw)
     }
 
-    raf = requestAnimationFrame(draw)
-    return () => cancelAnimationFrame(raf)
+    return startLoop(canvas, draw)
   }, [])
 
   return (

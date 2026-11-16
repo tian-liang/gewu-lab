@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { setupCanvas } from './canvas-env'
 
 /** 锐角三角函数：角度滑杆 → sin / cos / tan（含移动端紧凑布局） */
 export default function TrigDemo() {
@@ -8,16 +9,9 @@ export default function TrigDemo() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const dpr = window.devicePixelRatio || 1
-    const W = canvas.clientWidth
-    const compact = W < 560
-    const H = compact ? 520 : 400
-    canvas.width = W * dpr
-    canvas.height = H * dpr
-    canvas.style.height = `${H}px`
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    const env = setupCanvas(canvas, (w) => (w < 560 ? 520 : 400))
+    if (!env) return
+    const { ctx, W, H, compact } = env
 
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, W, H)

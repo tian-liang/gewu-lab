@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { setupCanvas } from './canvas-env'
 
 /** 受力分析实验室：水平面上受斜向拉力的小车 */
 export default function ForceDemo() {
@@ -24,15 +25,9 @@ export default function ForceDemo() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    const dpr = window.devicePixelRatio || 1
-    const W = canvas.clientWidth
-    const H = 420
-    canvas.width = W * dpr
-    canvas.height = H * dpr
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    const env = setupCanvas(canvas, 420)
+    if (!env) return
+    const { ctx, W, H } = env
 
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, W, H)

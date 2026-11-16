@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { setupCanvas } from './canvas-env'
 
 /** 二次函数 y = ax² + bx + c 图像实验 */
 export default function QuadraticDemo() {
@@ -10,14 +11,9 @@ export default function QuadraticDemo() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const dpr = window.devicePixelRatio || 1
-    const W = canvas.clientWidth
-    const H = 420
-    canvas.width = W * dpr
-    canvas.height = H * dpr
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    const env = setupCanvas(canvas, 420)
+    if (!env) return
+    const { ctx, W, H } = env
 
     const xMin = -8, xMax = 8, yMin = -8, yMax = 8
     const sx = (x: number) => ((x - xMin) / (xMax - xMin)) * W

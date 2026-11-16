@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { setupCanvas } from './canvas-env'
 
 function readParams() {
   const params = new URLSearchParams(location.hash.replace(/^#/, ''))
@@ -32,15 +33,9 @@ export default function LinearDemo() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    const dpr = window.devicePixelRatio || 1
-    const W = canvas.clientWidth
-    const H = 420
-    canvas.width = W * dpr
-    canvas.height = H * dpr
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    const env = setupCanvas(canvas, 420)
+    if (!env) return
+    const { ctx, W, H } = env
 
     // 视口：数学坐标范围 x∈[-8,8], y∈[-6,6]
     const xMin = -8, xMax = 8, yMin = -6, yMax = 6

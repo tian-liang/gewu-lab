@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { setupCanvas, startLoop } from './canvas-env'
 
 const STROKES = ['吸气冲程', '压缩冲程', '做功冲程', '排气冲程']
 
@@ -15,18 +16,10 @@ export default function HeatEngineDemo() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const dpr = window.devicePixelRatio || 1
-    const W = canvas.clientWidth
-    const compact = W < 560
-    const H = compact ? 480 : 380
-    canvas.width = W * dpr
-    canvas.height = H * dpr
-    canvas.style.height = `${H}px`
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    const env = setupCanvas(canvas, (w) => (w < 560 ? 480 : 380))
+    if (!env) return
+    const { ctx, W, H, compact } = env
 
-    let raf = 0
     let lastStroke = -1
 
     const draw = () => {
@@ -166,11 +159,9 @@ export default function HeatEngineDemo() {
       ctx.fillStyle = s === 2 ? '#16a34a' : '#8b95a5'
       ctx.font = '12px -apple-system, "PingFang SC", sans-serif'
       ctx.fillText(s === 2 ? '内能 → 机械能' : s === 1 ? '机械能 → 内能' : '惯性运转', textX, textY + 48)
-
-      raf = requestAnimationFrame(draw)
     }
-    raf = requestAnimationFrame(draw)
-    return () => cancelAnimationFrame(raf)
+
+    return startLoop(canvas, draw)
   }, [])
 
   return (

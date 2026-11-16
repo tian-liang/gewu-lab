@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { setupCanvas, startLoop } from './canvas-env'
 
 /** s-t 与 v-t 运动图像联动（含移动端紧凑布局） */
 export default function MotionGraphDemo() {
@@ -12,18 +13,10 @@ export default function MotionGraphDemo() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const dpr = window.devicePixelRatio || 1
-    const W = canvas.clientWidth
-    const compact = W < 560
-    const H = compact ? 560 : 380
-    canvas.width = W * dpr
-    canvas.height = H * dpr
-    canvas.style.height = `${H}px`
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    const env = setupCanvas(canvas, (w) => (w < 560 ? 560 : 380))
+    if (!env) return
+    const { ctx, W, H, compact } = env
 
-    let raf = 0
     const draw = () => {
       const { v0, acc, tMax } = paramsRef.current
       ctx.fillStyle = '#ffffff'
@@ -138,11 +131,9 @@ export default function MotionGraphDemo() {
       ctx.fillText('t/s', vtX + plotW - 20, vtY + plotH + 16)
       ctx.fillText('v', vtX - 16, vtY + 20)
       ctx.fillText(`v-t 斜率 = a = ${acc.toFixed(1)} m/s²`, vtX + 30, vtY + 20)
-
-      raf = requestAnimationFrame(draw)
     }
-    raf = requestAnimationFrame(draw)
-    return () => cancelAnimationFrame(raf)
+
+    return startLoop(canvas, draw)
   }, [])
 
   return (

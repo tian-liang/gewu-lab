@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { fitText } from './canvas-text'
+import { setupCanvas, startLoop } from './canvas-env'
 
 /** 电磁感应：磁铁穿过线圈，观察感应电流 */
 export default function InductionDemo() {
@@ -16,16 +17,10 @@ export default function InductionDemo() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const dpr = window.devicePixelRatio || 1
-    const W = canvas.clientWidth
-    const H = 380
-    canvas.width = W * dpr
-    canvas.height = H * dpr
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    const env = setupCanvas(canvas, 380)
+    if (!env) return
+    const { ctx, W, H } = env
 
-    let raf = 0
     const draw = () => {
       if (modeRef.current === 'auto') {
         magnetRef.current.x += speedRef.current * magnetRef.current.dir
@@ -144,11 +139,9 @@ export default function InductionDemo() {
         W - 40,
         '12px -apple-system, "PingFang SC", sans-serif'
       )
-
-      raf = requestAnimationFrame(draw)
     }
-    raf = requestAnimationFrame(draw)
-    return () => cancelAnimationFrame(raf)
+
+    return startLoop(canvas, draw)
   }, [magnetX])
 
   return (

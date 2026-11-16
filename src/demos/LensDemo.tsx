@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { fitText } from './canvas-text'
+import { setupCanvas } from './canvas-env'
 
 /** 凸透镜成像：物距、焦距 → 像的位置与虚实 */
 export default function LensDemo() {
@@ -10,14 +11,9 @@ export default function LensDemo() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const dpr = window.devicePixelRatio || 1
-    const W = canvas.clientWidth
-    const H = 380
-    canvas.width = W * dpr
-    canvas.height = H * dpr
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    const env = setupCanvas(canvas, 380)
+    if (!env) return
+    const { ctx, W, H } = env
 
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, W, H)

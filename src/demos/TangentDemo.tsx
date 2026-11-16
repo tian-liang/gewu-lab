@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { setupCanvas } from './canvas-env'
 
 /** 圆的切线性质：拖动圆外一点，观察切线与切线长 */
 export default function TangentDemo() {
@@ -10,16 +11,9 @@ export default function TangentDemo() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const dpr = window.devicePixelRatio || 1
-    const W = canvas.clientWidth
-    const compact = W < 560
-    const H = compact ? 500 : 400
-    canvas.width = W * dpr
-    canvas.height = H * dpr
-    canvas.style.height = `${H}px`
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    const env = setupCanvas(canvas, (w) => (w < 560 ? 500 : 400))
+    if (!env) return
+    const { ctx, W, H, compact } = env
 
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, W, H)

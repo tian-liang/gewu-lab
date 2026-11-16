@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { setupCanvas } from './canvas-env'
 
 const ELEMENTS = [
   { symbol: 'H', name: '氢', z: 1, shells: [1] },
@@ -23,14 +24,9 @@ export default function AtomDemo() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    const dpr = window.devicePixelRatio || 1
-    const W = canvas.clientWidth
-    const H = 400
-    canvas.width = W * dpr
-    canvas.height = H * dpr
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    const env = setupCanvas(canvas, 400)
+    if (!env) return
+    const { ctx, W, H } = env
 
     ctx.fillStyle = '#ffffff'
     ctx.fillRect(0, 0, W, H)
