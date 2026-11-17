@@ -48,14 +48,20 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'CACHE_URLS' && Array.isArray(event.data.urls)) {
     event.waitUntil(
       caches.open(RUNTIME_CACHE).then(async (cache) => {
+        let ok = 0
         for (const url of event.data.urls) {
           try {
             const res = await fetch(url)
-            if (res.ok) await cache.put(url, res)
+            if (res.ok) {
+              await cache.put(url, res)
+              ok++
+            }
           } catch (e) {
             /* 单个失败忽略 */
           }
         }
+        // 回执：首批资源缓存完成
+        event.source?.postMessage({ type: 'CACHE_READY', count: ok })
       })
     )
   }

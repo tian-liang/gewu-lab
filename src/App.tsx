@@ -38,13 +38,31 @@ function PageFallback() {
 }
 
 export default function App() {
-  const { route, navigate } = useApp()
+  const { route, navigate, offlineReady, setOfflineReady } = useApp()
   const [ready, setReady] = useState(false)
 
   // 内容与题库模块动态加载（代码拆分）
   useEffect(() => {
     Promise.all([initContent(), initQuestions()]).then(() => setReady(true))
   }, [])
+
+  // 离线缓存就绪状态：SW 回执 或 直接检查缓存条目（回访/离线场景）
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      if (e.data?.type === 'CACHE_READY') setOfflineReady(true)
+    }
+    navigator.serviceWorker?.addEventListener('message', onMsg)
+    if ('caches' in window) {
+      caches.keys().then(async (keys) => {
+        let total = 0
+        for (const k of keys.filter((k) => k.startsWith('gewu-lab-'))) {
+          total += (await (await caches.open(k)).keys()).length
+        }
+        if (total >= 4) setOfflineReady(true)
+      })
+    }
+    return () => navigator.serviceWorker?.removeEventListener('message', onMsg)
+  }, [setOfflineReady])
 
   // 带 #demo= 的分享链接直接进入实验室
   useEffect(() => {
@@ -85,6 +103,26 @@ export default function App() {
         <div style={{ marginTop: 'auto', padding: '12px' }}>
           <p className="small muted" style={{ margin: 0, lineHeight: 1.6 }}>
             数据保存在本机浏览器
+            {offlineReady && (
+              <span
+                title="离线资源已就绪，断网可用"
+                style={{ marginLeft: 6, display: 'inline-flex', verticalAlign: 'middle' }}
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--accent)"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M6.5 18a4 4 0 0 1-.4-7.97A6 6 0 0 1 17.7 9.2 3.5 3.5 0 0 1 17 18z" />
+                  <path d="M9.2 13.6l2.1 2.1 3.9-4" />
+                </svg>
+              </span>
+            )}
             <br />
             记得定期导出备份
           </p>
